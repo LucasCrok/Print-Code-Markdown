@@ -54,47 +54,10 @@ def print_files_in_directory(directory: str,
                 try:
                     with open(item_path, 'r', encoding='utf-8', errors='ignore') as file:
                         lines = file.readlines()
-
-                        def filter_comments(lines):
-                            in_block_comment = False
-                            result = []
-                            for line in lines:
-                                stripped = line.strip()
-
-                                if in_block_comment:
-                                    if "*/" in stripped:
-                                        in_block_comment = False
-                                        line = line.split("*/", 1)[1]
-                                        stripped = line.strip()
-                                    else:
-                                        continue
-
-                                if not in_block_comment and "/*" in stripped:
-                                    slash_slash_pos = stripped.find("//")
-                                    slash_star_pos = stripped.find("/*")
-                                    if slash_slash_pos != -1 and slash_slash_pos < slash_star_pos:
-                                        line = line.split("//", 1)[0]
-                                    else:
-                                        in_block_comment = True
-                                        if "*/" in stripped[slash_star_pos+2:]:
-                                            in_block_comment = False
-                                            line = (line.split("/*", 1)[0] +
-                                                    line.split("*/", 1)[1])
-                                        else:
-                                            line = line.split("/*", 1)[0]
-
-                                if not in_block_comment and "//" in stripped:
-                                    line = line.split("//", 1)[0]
-
-                                if line.strip():
-                                    result.append(line)
-                            return result
-
-                        code_lines = filter_comments(lines)
+                        # Keep all comments: only filter out import/from/package lines
                         filtered_code_lines = [
-                            ln for ln in code_lines
+                            ln for ln in lines
                             if not ln.strip().startswith(("import ", "from ", "package "))
-                            and not ln.isspace()
                         ]
                         code = "".join(filtered_code_lines).strip()
 
